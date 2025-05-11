@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Split Bill Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        'primary-dark': '#4A49B0',
+                        'primary-light': '#7776E7',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        }
+                    },
+                    animation: {
+                        fadeIn: 'fadeIn 0.5s ease-in-out'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-primary text-white shadow-md">
+            <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+                <h1 class="text-2xl font-bold">Split Bill Calculator</h1>
+                <div class="flex space-x-3">
+                    <button id="themeToggle" class="p-2 rounded-full hover:bg-primary-dark transition-colors">
+                        <i class="fa-solid fa-moon hidden dark:block"></i>
+                        <i class="fa-solid fa-sun dark:hidden"></i>
+                    </button>
+                    <button id="settingsBtn" class="p-2 rounded-full hover:bg-primary-dark transition-colors">
+                        <i class="fa-solid fa-gear"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="bg-gray-100 dark:bg-gray-800 shadow-sm">
+            <div class="container mx-auto px-4">
+                <div class="flex space-x-1">
+                    <button id="calcNavBtn" class="px-4 py-3 font-medium border-b-2 border-primary text-primary dark:text-primary-light">
+                        Calculator
+                    </button>
+                    <button id="howToNavBtn" class="px-4 py-3 font-medium border-b-2 border-transparent hover:text-primary dark:hover:text-primary-light transition-colors">
+                        How to Use
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto px-4 py-6">
+            <!-- Calculator View -->
+            <div id="calculatorView" class="animate-fadeIn">
+                <div class="max-w-lg mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold">Calculator</h2>
+                        <div class="flex space-x-2">
+                            <button id="splitEvenlyBtn" class="px-3 py-1 rounded-full bg-primary text-white text-sm hover:bg-primary-dark transition-colors">
+                                Split Evenly
+                            </button>
+                            <button id="splitItemsBtn" class="px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                By Items
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Split Evenly Section -->
+                    <div id="splitEvenlySection">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1" for="billTotal">
+                                    Bill Total ($)
+                                </label>
+                                <input type="number" id="billTotal" 
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light focus:border-transparent text-base" 
+                                    placeholder="0.00" step="0.01" min="0">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-1" for="taxPercent">
+                                    Tax (%)
+                                </label>
+                                <input type="number" id="taxPercent" 
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light focus:border-transparent text-base" 
+                                    placeholder="0.0" step="0.1" min="0" value="8.5">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-1">
+                                    Tip
+                                </label>
+                                <div class="flex space-x-2 mb-2">
+                                    <button class="tip-btn flex-1 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 font-medium transition-colors" data-value="15">15%</button>
+                                    <button class="tip-btn flex-1 py-2 rounded-lg bg-primary text-white hover:bg-primary-dark font-medium transition-colors" data-value="18">18%</button>
+                                    <button class="tip-btn flex-1 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 font-medium transition-colors" data-value="20">20%</button>
+                                    <button class="tip-btn flex-1 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 font-medium transition-colors" data-value="custom">Custom</button>
+                                </div>
+                                <div id="customTipContainer" class="hidden">
+                                    <input type="number" id="customTipPercent" 
+                                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light focus:border-transparent text-base" 
+                                        placeholder="Custom tip %" step="0.1" min="0">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-1" for="numPeople">
+                                    Number of People
+                                </label>
+                                <input type="number" id="numPeople" 
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light focus:border-transparent text-base" 
+                                    placeholder="1" step="1" min="1" value="2">
+                            </div>
+
+                            <button id="calculateBtn" class="w-full py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors mt-4">
+                                Calculate
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Split by Items Section -->
+                    <div id="splitItemsSection" class="hidden">
+                        <div class="space-y-4">
+                            <div class="space-y-2" id="itemsContainer">
+                                <div class="item-row grid grid-cols-12 gap-2">
+                                    <div class="col-span-5">
+                                        <input type="text" placeholder="Item name" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light focus:border-transparent text-base">
+                                    </div>
+                                    <div class="col-span-3">
+                                        <input type="number" placeholder="$" step="0.01" min="0" class="item-price w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light focus:border-transparent text-base">
+                                    </div>
+                                    <div class="col-span-3">
+                                        <select class="item-person w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light focus:border-transparent text-base">
+                                            <option value="shared">Shared</option>
+                                            <option value="person1">Person 1</option>
+                                            <option value="person2">Person 2</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-span-1 flex items-center justify-center">
+                                        <button class="delete-item text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400">
+                                            <i class="fa-solid fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button id="addItemBtn" class="w-full py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center justify-center">
+                                <i class="fa-solid fa-plus mr-2"></i> Add Item
+                            </button>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-1" for="itemsTaxPercent">
+                                    Tax (%)
+                                </label>
+                                <input type="number" id="itemsTaxPercent" 
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light focus:border-transparent text-base" 
+                                    placeholder="0.0" step="0.1" min="0" value="8.5">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-1">
+                                    Tip
+                                </label>
+                                <div class="flex space-x-2 mb-2">
+                                    <button class="items-tip-btn flex-1 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 font-medium transition-colors" data-value="15">15%</button>
+                                    <button class="items-tip-btn flex-1 py-2 rounded-lg bg-primary text-white hover:bg-primary-dark font-medium transition-colors" data-value="18">18%</button>
+                                    <button class="items-tip-btn flex-1 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 font-medium transition-colors" data-value="20">20%</button>
+                                    <button class="items-tip-btn flex-1 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 font-medium transition-colors" data-value="custom">Custom</button>
+                                </div>
+                                <div id="itemsCustomTipContainer" class="hidden">
+                                    <input type="number" id="itemsCustomTipPercent" 
+                                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light focus:border-transparent text-base" 
+                                        placeholder="Custom tip %" step="0.1" min="0">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-1" for="itemsNumPeople">
+                                    Number of People
+                                </label>
+                                <input type="number" id="itemsNumPeople" 
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light focus:border-transparent text-base" 
+                                    placeholder="1" step="1" min="1" value="2">
+                            </div>
+
+                            <button id="calculateItemsBtn" class="w-full py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors mt-4">
+                                Calculate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Card -->
+                <div id="resultsCard" class="max-w-lg mx-auto mt-6 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden p-6 hidden animate-fadeIn">
+                    <h2 class="text-xl font-bold mb-4">Results</h2>
+                    <div class="space-y-4" id="resultsContent">
+                        <!-- Results will be populated here -->
+                    </div>
+                    <div class="flex justify-between mt-6">
+                        <button id="resetBtn" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                            Reset
+                        </button>
+                        <button id="shareBtn" class="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors">
+                            <i class="fa-solid fa-share-alt mr-2"></i> Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How To Use View -->
+            <div id="howToUseView" class="hidden animate-fadeIn">
+                <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden p-6">
+                    <h2 class="text-2xl font-bold mb-6">How to Use Split Bill Calculator</h2>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Split Evenly</h3>
+                            <p class="mb-2">Use this option when everyone is paying an equal share of the bill:</p>
+                            <ol class="list-decimal list-inside space-y-2 ml-4">
+                                <li>Enter the total bill amount</li>
+                                <li>Enter the tax percentage (pre-filled with 8.5%)</li>
+                                <li>Select a tip percentage or enter a custom amount</li>
+                                <li>Enter the number of people sharing the bill</li>
+                                <li>Click Calculate to see each person's share</li>
+                            </ol>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Split by Items</h3>
+                            <p class="mb-2">Use this option when people are paying for specific items:</p>
+                            <ol class="list-decimal list-inside space-y-2 ml-4">
+                                <li>Add items with their prices</li>
+                                <li>Assign each item to a specific person or mark as shared</li>
+                                <li>Add the tax percentage</li>
+                                <li>Select a tip percentage</li>
+                                <li>Enter the number of people sharing the bill</li>
+                                <li>Click Calculate to see each person's share</li>
+                            </ol>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Additional Features</h3>
+                            <ul class="list-disc list-inside space-y-2 ml-4">
+                                <li>Toggle between light and dark mode using the sun/moon icon</li>
+                                <li>Access settings to customize the app</li>
+                                <li>Share your results with others</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full max-h-[80vh] overflow-y-auto">
+                <div class="flex justify-between items-center p-4 border-b dark:border-gray-700">
+                    <h2 class="text-xl font-bold">Settings</h2>
+                    <button id="closeSettingsBtn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6 space-y-6">
+                    <div>
+                        <h3 class="text-lg font-medium mb-3">Display</h3>
+                        <div class="flex items-center justify-between">
+                            <span>Dark Mode</span>
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="darkModeToggle" class="sr-only peer">
+                                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/25 dark:peer-focus:ring-primary/25 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-medium mb-3">Defaults</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1" for="defaultTax">
+                                    Default Tax Rate (%)
+                                </label>
+                                <input type="number" id="defaultTax" 
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light focus:border-transparent text-base" 
+                                    placeholder="0.0" step="0.1" min="0" value="8.5">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1" for="defaultTip">
+                                    Default Tip (%)
+                                </label>
+                                <input type="number" id="defaultTip" 
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light focus:border-transparent text-base" 
+                                    placeholder="0.0" step="1" min="0" value="18">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1" for="defaultPeople">
+                                    Default Number of People
+                                </label>
+                                <input type="number" id="defaultPeople" 
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light focus:border-transparent text-base" 
+                                    placeholder="1" step="1" min="1" value="2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 border-t dark:border-gray-700 flex justify-end">
+                    <button id="saveSettingsBtn" class="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors">
+                        Save Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-gray-100 dark:bg-gray-800 py-4 mt-auto">
+            <div class="container mx-auto px-4 text-center text-sm text-gray-600 dark:text-gray-400">
+                &copy; 2025 Split Bill Calculator 
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize dark mode
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            
+            // Update the dark mode toggle in settings
+            document.getElementById('darkModeToggle').checked = document.documentElement.classList.contains('dark');
+        });
+
+        // Load saved settings
+        function loadSettings() {
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.documentElement.classList.add('dark');
+            } else if (localStorage.getItem('darkMode') === 'false') {
+                document.documentElement.classList.remove('dark');
+            }
+            
+            document.getElementById('darkModeToggle').checked = document.documentElement.classList.contains('dark');
+            
+            if (localStorage.getItem('defaultTax')) {
+                const defaultTax = localStorage.getItem('defaultTax');
+                document.getElementById('defaultTax').value = defaultTax;
+                document.getElementById('taxPercent').value = defaultTax;
+                document.getElementById('itemsTaxPercent').value = defaultTax;
+            }
+            
+            if (localStorage.getItem('defaultTip')) {
+                const defaultTip = localStorage.getItem('defaultTip');
+                document.getElementById('defaultTip').value = defaultTip;
+                
+                // Reset all tip buttons
+                document.querySelectorAll('.tip-btn, .items-tip-btn').forEach(btn => {
+                    btn.classList.remove('bg-primary', 'text-white');
+                    btn.classList.add('bg-gray-200', 'dark:bg-gray-700');
+                });
+                
+                // Select the matching tip button
+                const tipBtns = document.querySelectorAll('.tip-btn');
+                const itemsTipBtns = document.querySelectorAll('.items-tip-btn');
+                
+                [tipBtns, itemsTipBtns].forEach(btnGroup => {
+                    let foundMatch = false;
+                    btnGroup.forEach(btn => {
+                        if (btn.dataset.value === defaultTip) {
+                            btn.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+                            btn.classList.add('bg-primary', 'text-white');
+                            foundMatch = true;
+                        }
+                    });
+                    
+                    // If no matching button, select custom
+                    if (!foundMatch) {
+                        const customBtn = Array.from(btnGroup).find(btn => btn.dataset.value === 'custom');
+                        if (customBtn) {
+                            customBtn.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+                            customBtn.classList.add('bg-primary', 'text-white');
+                            
+                            // Show custom input and set value
+                            if (btnGroup === tipBtns) {
+                                document.getElementById('customTipContainer').classList.remove('hidden');
+                                document.getElementById('customTipPercent').value = defaultTip;
+                            } else {
+                                document.getElementById('itemsCustomTipContainer').classList.remove('hidden');
+                                document.getElementById('itemsCustomTipPercent').value = defaultTip;
+                            }
+                        }
+                    }
+                });
+            }
+            
+            if (localStorage.getItem('defaultPeople')) {
+                const defaultPeople = localStorage.getItem('defaultPeople');
+                document.getElementById('defaultPeople').value = defaultPeople;
+                document.getElementById('numPeople').value = defaultPeople;
+                document.getElementById('itemsNumPeople').value = defaultPeople;
+                updatePersonOptions();
+            }
+        }
+
+        // DOM Elements
+        const themeToggle = document.getElementById('themeToggle');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsModal = document.getElementById('settingsModal');
+        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const calcNavBtn = document.getElementById('calcNavBtn');
+        const howToNavBtn = document.getElementById('howToNavBtn');
+        const calculatorView = document.getElementById('calculatorView');
+        const howToUseView = document.getElementById('howToUseView');
+        const splitEvenlyBtn = document.getElementById('splitEvenlyBtn');
+        const splitItemsBtn = document.getElementById('splitItemsBtn');
+        const splitEvenlySection = document.getElementById('splitEvenlySection');
+        const splitItemsSection = document.getElementById('splitItemsSection');
+        const addItemBtn = document.getElementById('addItemBtn');
+        const itemsContainer = document.getElementById('itemsContainer');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const calculateItemsBtn = document.getElementById('calculateItemsBtn');
+        const resultsCard = document.getElementById('resultsCard');
+        const resultsContent = document.getElementById('resultsContent');
+        const resetBtn = document.getElementById('resetBtn');
+        const shareBtn = document.getElementById('shareBtn');
+        const itemsNumPeople = document.getElementById('itemsNumPeople');
+
+        // Event Listeners
+        themeToggle.addEventListener('click', toggleTheme);
+        settingsBtn.addEventListener('click', openSettings);
+        closeSettingsBtn.addEventListener('click', closeSettings);
+        saveSettingsBtn.addEventListener('click', saveSettings);
+        darkModeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+        
+        calcNavBtn.addEventListener('click', showCalculator);
+        howToNavBtn.addEventListener('click', showHowTo);
+        
+        splitEvenlyBtn.addEventListener('click', showSplitEvenly);
+        splitItemsBtn.addEventListener('click', showSplitItems);
+        
+        addItemBtn.addEventListener('click', addItem);
+        
+        calculateBtn.addEventListener('click', calculateEven);
+        calculateItemsBtn.addEventListener('click', calculateItems);
+        
+        resetBtn.addEventListener('click', resetCalculator);
+        shareBtn.addEventListener('click', shareResults);
+        
+        itemsNumPeople.addEventListener('change', updatePersonOptions);
+        
+        // Set up tip buttons
+        document.querySelectorAll('.tip-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tip-btn').forEach(b => {
+                    b.classList.remove('bg-primary', 'text-white');
+                    b.classList.add('bg-gray-200', 'dark:bg-gray-700');
+                });
+                this.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+                this.classList.add('bg-primary', 'text-white');
+                
+                if (this.dataset.value === 'custom') {
+                    document.getElementById('customTipContainer').classList.remove('hidden');
+                } else {
+                    document.getElementById('customTipContainer').classList.add('hidden');
+                }
+            });
+        });
+        
+        document.querySelectorAll('.items-tip-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.items-tip-btn').forEach(b => {
+                    b.classList.remove('bg-primary', 'text-white');
+                    b.classList.add('bg-gray-200', 'dark:bg-gray-700');
+                });
+                this.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+                this.classList.add('bg-primary', 'text-white');
+                
+                if (this.dataset.value === 'custom') {
+                    document.getElementById('itemsCustomTipContainer').classList.remove('hidden');
+                } else {
+                    document.getElementById('itemsCustomTipContainer').classList.add('hidden');
+                }
+            });
+        });
+
+        // Functions
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+            darkModeToggle.checked = document.documentElement.classList.contains('dark');
+        }
+        
+        function openSettings() {
+            settingsModal.classList.remove('hidden');
+        }
+        
+        function closeSettings() {
+            settingsModal.classList.add('hidden');
+        }
+        
+        function saveSettings() {
+            const defaultTax = document.getElementById('defaultTax').value;
+            const defaultTip = document.getElementById('defaultTip').value;
+            const defaultPeople = document.getElementById('defaultPeople').value;
+            
+            localStorage.setItem('darkMode', darkModeToggle.checked);
+            localStorage.setItem('defaultTax', defaultTax);
+            localStorage.setItem('defaultTip', defaultTip);
+            localStorage.setItem('defaultPeople', defaultPeople);
+            
+            // Update current values
+            document.getElementById('taxPercent').value = defaultTax;
+            document.getElementById('itemsTaxPercent').value = defaultTax;
+            document.getElementById('numPeople').value = defaultPeople;
+            document.getElementById('itemsNumPeople').value = defaultPeople;
+            
+            // Update person dropdowns
+            updatePersonOptions();
+            
+            closeSettings();
+        }
+        
+        function showCalculator() {
+            calcNavBtn.classList.add('border-primary', 'text-primary', 'dark:text-primary-light');
+            calcNavBtn.classList.remove('border-transparent', 'hover:text-primary', 'dark:hover:text-primary-light');
+            
+            howToNavBtn.classList.remove('border-primary', 'text-primary', 'dark:text-primary-light');
+            howToNavBtn.classList.add('border-transparent', 'hover:text-primary', 'dark:hover:text-primary-light');
+            
+            calculatorView.classList.remove('hidden');
+            howToUseView.classList.add('hidden');
+        }
+        
+        function showHowTo() {
+            howToNavBtn.classList.add('border-primary', 'text-primary', 'dark:text-primary-light');
+            howToNavBtn.classList.remove('border-transparent', 'hover:text-primary', 'dark:hover:text-primary-light');
+            
+            calcNavBtn.classList.remove('border-primary', 'text-primary', 'dark:text-primary-light');
+            calcNavBtn.classList.add('border-transparent', 'hover:text-primary', 'dark:hover:text-primary-light');
+            
+            calculatorView.classList.add('hidden');
+            howToUseView.classList.remove('hidden');
+        }
+        
+        function showSplitEvenly() {
+            splitEvenlyBtn.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+            splitEvenlyBtn.classList.add('bg-primary', 'text-white');
+            
+            splitItemsBtn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+            splitItemsBtn.classList.remove('bg-primary', 'text-white');
+            
+            splitEvenlySection.classList.remove('hidden');
+            splitItemsSection.classList.add('hidden');
+        }
+        
+        function showSplitItems() {
+            splitItemsBtn.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+            splitItemsBtn.classList.add('bg-primary', 'text-white');
+            
+            splitEvenlyBtn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+            splitEvenlyBtn.classList.remove('bg-primary', 'text-white');
+            
+            splitItemsSection.classList.remove('hidden');
+            splitEvenlySection.classList.add('hidden');
+        }
+        
+        function addItem() {
+            const newItem = document.createElement('div');
+            newItem.className = 'item-row grid grid-cols-12 gap-2';
+            newItem.innerHTML = `
+                <div class="col-span-5">
+                    <input type="text" placeholder="Item name" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light focus:border-transparent text-base">
+                </div>
+                <div class="col-span-3">
+                    <input type="number" placeholder="$" step="0.01" min="0" class="item-price w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light focus:border-transparent text-base">
+                </div>
+                <div class="col-span-3">
+                    <select class="item-person w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light focus:border-transparent text-base">
+                        <option value="shared">Shared</option>
+                        ${generatePersonOptions()}
+                    </select>
+                </div>
+                <div class="col-span-1 flex items-center justify-center">
+                    <button class="delete-item text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            itemsContainer.appendChild(newItem);
+            
+            // Add delete event listener
+            newItem.querySelector('.delete-item').addEventListener('click', function() {
+                newItem.remove();
+            });
+        }
+        
+        function generatePersonOptions() {
+            const numPeople = parseInt(itemsNumPeople.value) || 2;
+            let options = '';
+            
+            for (let i = 1; i <= numPeople; i++) {
+                options += `<option value="person${i}">Person ${i}</option>`;
+            }
+            
+            return options;
+        }
+        
+        function updatePersonOptions() {
+            const numPeople = parseInt(itemsNumPeople.value) || 2;
+            
+            // Update all existing selects
+            document.querySelectorAll('.item-person').forEach(select => {
+                const currentValue = select.value;
+                let options = '<option value="shared">Shared</option>';
+                
+                for (let i = 1; i <= numPeople; i++) {
+                    options += `<option value="person${i}" ${currentValue === `person${i}` ? 'selected' : ''}>Person ${i}</option>`;
+                }
+                
+                select.innerHTML = options;
+            });
+        }
+        
+        function calculateEven() {
+            const billTotal = parseFloat(document.getElementById('billTotal').value) || 0;
+            if (billTotal <= 0) {
+                alert('Please enter a valid bill total.');
+                return;
+            }
+            
+            const taxPercent = parseFloat(document.getElementById('taxPercent').value) || 0;
+            const numPeople = parseInt(document.getElementById('numPeople').value) || 1;
+            
+            // Get tip percentage
+            let tipPercent = 0;
+            const selectedTipBtn = document.querySelector('.tip-btn.bg-primary');
+            
+            if (selectedTipBtn.dataset.value === 'custom') {
+                tipPercent = parseFloat(document.getElementById('customTipPercent').value) || 0;
+            } else {
+                tipPercent = parseFloat(selectedTipBtn.dataset.value) || 0;
+            }
+            
+            // Calculate
+            const taxAmount = billTotal * (taxPercent / 100);
+            const subtotalWithTax = billTotal + taxAmount;
+            const tipAmount = subtotalWithTax * (tipPercent / 100);
+            const totalWithTip = subtotalWithTax + tipAmount;
+            const perPersonAmount = totalWithTip / numPeople;
+            
+            // Display results
+            resultsContent.innerHTML = `
+                <div class="grid grid-cols-2 gap-y-2">
+                    <div class="font-medium">Original Bill:</div>
+                    <div class="text-right">$${billTotal.toFixed(2)}</div>
+                    
+                    <div class="font-medium">Tax (${taxPercent}%):</div>
+                    <div class="text-right">$${taxAmount.toFixed(2)}</div>
+                    
+                    <div class="font-medium">Subtotal with Tax:</div>
+                    <div class="text-right">$${subtotalWithTax.toFixed(2)}</div>
+                    
+                    <div class="font-medium">Tip (${tipPercent}%):</div>
+                    <div class="text-right">$${tipAmount.toFixed(2)}</div>
+                    
+                    <div class="font-medium">Total with Tip:</div>
+                    <div class="text-right">$${totalWithTip.toFixed(2)}</div>
+                </div>
+                
+                <div class="mt-4 p-4 bg-primary/10 dark:bg-primary/20 rounded-lg">
+                    <div class="grid grid-cols-2 gap-y-2">
+                        <div class="text-lg font-bold">Each Person Pays:</div>
+                        <div class="text-right text-lg font-bold">$${perPersonAmount.toFixed(2)}</div>
+                    </div>
+                </div>
+            `;
+            
+            resultsCard.classList.remove('hidden');
+        }
+        
+        function calculateItems() {
+            // Get all items
+            const itemRows = document.querySelectorAll('#itemsContainer .item-row');
+            if (itemRows.length === 0) {
+                alert('Please add at least one item.');
+                return;
+            }
+            
+            const taxPercent = parseFloat(document.getElementById('itemsTaxPercent').value) || 0;
+            const numPeople = parseInt(document.getElementById('itemsNumPeople').value) || 1;
+            
+            // Get tip percentage
+            let tipPercent = 0;
+            const selectedTipBtn = document.querySelector('.items-tip-btn.bg-primary');
+            
+            if (selectedTipBtn.dataset.value === 'custom') {
+                tipPercent = parseFloat(document.getElementById('itemsCustomTipPercent').value) || 0;
+            } else {
+                tipPercent = parseFloat(selectedTipBtn.dataset.value) || 0;
+            }
+            
+            // Initialize person amounts
+            let personAmounts = {};
+            for (let i = 1; i <= numPeople; i++) {
+                personAmounts[`person${i}`] = 0;
+            }
+            
+            let totalBill = 0;
+            let sharedTotal = 0;
+            
+            // Calculate each person's items
+            itemRows.forEach(row => {
+                const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                if (price <= 0) return;
+                
+                const assignedTo = row.querySelector('.item-person').value;
+                
+                totalBill += price;
+                
+                if (assignedTo === 'shared') {
+                    sharedTotal += price;
+                } else {
+                    personAmounts[assignedTo] += price;
+                }
+            });
+            
+            // Calculate tax and tip
+            const taxAmount = totalBill * (taxPercent / 100);
+            const subtotalWithTax = totalBill + taxAmount;
+            const tipAmount = subtotalWithTax * (tipPercent / 100);
+            const totalWithTip = subtotalWithTax + tipAmount;
+            
+            // Distribute shared items, tax, and tip
+            const sharedTaxAndTip = (sharedTotal / totalBill) * (taxAmount + tipAmount);
+            const sharedPerPerson = (sharedTotal + sharedTaxAndTip) / numPeople;
+            
+            // Add shared portion to each person
+            for (let person in personAmounts) {
+                // Calculate this person's portion of tax and tip for their items
+                const personTaxAndTip = (personAmounts[person] / totalBill) * (taxAmount + tipAmount);
+                
+                // Add their items, their tax/tip, and their portion of shared items
+                personAmounts[person] = personAmounts[person] + personTaxAndTip + sharedPerPerson;
+            }
+            
+            // Display results
+            let resultsHTML = `
+                <div class="grid grid-cols-2 gap-y-2">
+                    <div class="font-medium">Original Bill:</div>
+                    <div class="text-right">$${totalBill.toFixed(2)}</div>
+                    
+                    <div class="font-medium">Tax (${taxPercent}%):</div>
+                    <div class="text-right">$${taxAmount.toFixed(2)}</div>
+                    
+                    <div class="font-medium">Subtotal with Tax:</div>
+                    <div class="text-right">$${subtotalWithTax.toFixed(2)}</div>
+                    
+                    <div class="font-medium">Tip (${tipPercent}%):</div>
+                    <div class="text-right">$${tipAmount.toFixed(2)}</div>
+                    
+                    <div class="font-medium">Total with Tip:</div>
+                    <div class="text-right">$${totalWithTip.toFixed(2)}</div>
+                </div>
+                
+                <div class="mt-4 p-4 bg-primary/10 dark:bg-primary/20 rounded-lg space-y-4">
+                    <div class="text-lg font-bold">Each Person Pays:</div>
+            `;
+            
+            for (let i = 1; i <= numPeople; i++) {
+                const person = `person${i}`;
+                resultsHTML += `
+                    <div class="grid grid-cols-2 gap-y-1">
+                        <div class="font-medium">Person ${i}:</div>
+                        <div class="text-right font-bold">$${personAmounts[person].toFixed(2)}</div>
+                    </div>
+                `;
+            }
+            
+            resultsHTML += `</div>`;
+            
+            resultsContent.innerHTML = resultsHTML;
+            resultsCard.classList.remove('hidden');
+        }
+        
+        function resetCalculator() {
+            // Reset fields
+            document.getElementById('billTotal').value = '';
+            document.getElementById('customTipPercent').value = '';
+            document.getElementById('itemsCustomTipPercent').value = '';
+            
+            // Reset item rows (leave just one)
+            while (itemsContainer.children.length > 1) {
+                itemsContainer.removeChild(itemsContainer.lastChild);
+            }
+            
+            // Clear first item's fields
+            const firstItem = itemsContainer.firstChild;
+            if (firstItem) {
+                firstItem.querySelector('input[type="text"]').value = '';
+                firstItem.querySelector('.item-price').value = '';
+                firstItem.querySelector('.item-person').value = 'shared';
+            }
+            
+            // Hide results
+            resultsCard.classList.add('hidden');
+        }
+        
+        function shareResults() {
+            // Create text to share
+            let shareText = "Split Bill Calculator Results\n\n";
+            
+            // Add result content
+            shareText += resultsContent.textContent.replace(/\s+/g, ' ').trim();
+            
+            // Try to copy to clipboard
+            try {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert("Results copied to clipboard!");
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                    alert("Failed to copy to clipboard. Please try again.");
+                });
+            } catch (err) {
+                console.error('Clipboard API not available:', err);
+                alert("Sharing not supported on this device.");
+            }
+        }
+        
+        // Initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+            if (itemsContainer.children.length === 0) {
+                addItem(); // Add the first item row
+            }
+        });
+    </script>
+</body>
+</html>
